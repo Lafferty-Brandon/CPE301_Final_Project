@@ -11,7 +11,6 @@
 #include <Stepper.h>
 
 // Component and Pin Definitions
-
 // DHT11
 #define DHTPIN   22
 #define DHTTYPE  DHT11
@@ -87,7 +86,6 @@ const int STEPPER_IN3 = 52;
 const int STEPPER_IN4 = 53;
 
 // Constants
-
 const float TEMP_THRESHOLD_C = 24.3;                // adjust as needed
 const int   WATER_THRESHOLD  = 300;                 // ADC threshold, tune experimentally
 const unsigned long SENSOR_UPDATE_MS = 60000UL;     // 1 Minute delay
@@ -95,7 +93,6 @@ const int   VENT_STEP_SIZE   = 10;                  // stepper steps per button 
 const unsigned long VENT_STEP_INTERVAL_MS = 150;
 
 //  Helper macros 
-
 #define SET_BIT(reg, bit)    ((reg) |= (1 << (bit)))
 #define CLR_BIT(reg, bit)    ((reg) &= ~(1 << (bit)))
 #define READ_BIT(pinreg, bit) ((pinreg) & (1 << (bit)))
@@ -119,14 +116,12 @@ int ventPositionSteps = 0;
 unsigned long lastVentStepTime = 0;
 
 // Library objects 
-
 LiquidCrystal lcd(LCD_RS, LCD_E, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 DHT dht(DHTPIN, DHTTYPE);
 RTC_DS3231 rtc;
 Stepper ventStepper(STEPS_PER_REV, STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
 
 // UART0 
-
 #ifndef F_CPU
 #define F_CPU 16000000UL
 #endif
@@ -141,7 +136,6 @@ void uart0_init(uint32_t baud) {
 
 void uart0_putc(char c) {
   while (!(UCSR0A & (1 << UDRE0))) {
-    // wait for buffer empty
   }
   UDR0 = c;
 }
@@ -159,8 +153,8 @@ void uart0_println(const char *s) {
 
 // ADC (water level)
 void adc_init() {
-  ADMUX = (1 << REFS0);                 // AVcc reference, channel 0 by default
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1); // enable, prescaler 64
+  ADMUX = (1 << REFS0); 
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
 }
 
 uint16_t adc_read(uint8_t channel) {
@@ -241,8 +235,7 @@ void logVentPosition() {
   logEvent(buf);
 }
 
-// --------------------------- LCD helpers ---------------------------
-
+//LCD helpers
 void showStatusLine() {
   lcd.setCursor(0, 0);
   switch (currentState) {
@@ -255,17 +248,16 @@ void showStatusLine() {
 
 void showTempHumLine() {
   lcd.setCursor(0, 1);
-
-  // Clear the line first
+  
   for (int i = 0; i < 16; i++) lcd.print(' ');
-  lcd.setCursor(0, 1);
+    lcd.setCursor(0, 1);
 
-  lcd.print("T:");
-  lcd.print(lastTempC, 1);   // 1 decimal place (change to 0 if you want)
-  lcd.print("C H:");
-  lcd.print(lastHumidity, 0);
-  lcd.print("%");
-}
+    lcd.print("T:");
+    lcd.print(lastTempC, 1);
+    lcd.print("C H:");
+    lcd.print(lastHumidity, 0);
+    lcd.print("%");
+  }
 
 void showErrorLCD() {
   lcd.clear();
@@ -348,7 +340,6 @@ void UPDATE_VENT_CONTROL() {
 
 //Sensor update
 void READ_SENSORS_AND_UPDATE_LCD() {
-  // Don't monitor in DISABLED state (per project requirements)
   if (currentState == DISABLED) 
     return;
 
@@ -377,8 +368,6 @@ void READ_SENSORS_AND_UPDATE_LCD() {
     lcd.setCursor(0, 1);
   }
   showTempHumLine();
-
-  //Log the reading with RTC time
 char logbuf[80];
 int t10 = (int)(lastTempC * 10);
 int h10 = (int)(lastHumidity * 10);
